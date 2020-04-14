@@ -109,6 +109,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Models\Logger.cs" />
+    <Compile Include="Models\TargetCommunicationLogic.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -142,9 +144,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Resources\microcontroller.png" />
   </ItemGroup>

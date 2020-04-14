@@ -8,7 +8,7 @@ using Microsoft.Win32;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-//using BootloaderFlashUtility.Models;
+using BootloaderFlashUtility.Models;
 using System.Windows.Data;
 using log4net;
 
@@ -31,6 +31,26 @@ namespace BootloaderFlashUtility.ViewModels
         /// </summary>
         private int _selectedBaudRate;
 
+        /// <summary>
+        /// The Selected baud rate Value
+        /// </summary>
+        private string _selectedBootCommands;
+
+        /// <summary>
+        /// Instance of the Target Flash Logic class
+        /// </summary>
+        private TargetCommunicationLogic _targetCommunicationLogic;
+
+        /// <summary>
+        /// Boolean for target connection established
+        /// </summary>
+        private bool _isTargetConnected = false;
+
+        /// <summary>
+        /// Whether the connect button is enabled or not 
+        /// </summary>
+        private bool _isTestButtonConnectEnabled = true;
+
         #endregion
 
         #region Public Fields
@@ -42,6 +62,15 @@ namespace BootloaderFlashUtility.ViewModels
             get { return _title; }
             set { SetProperty(ref _title, value); }
         }
+        /// <summary>
+        /// Instance of the Target Flash Logic class
+        /// </summary>
+        public TargetCommunicationLogic TargetCommunicationLogic
+        {
+            get { return _targetCommunicationLogic; }
+            set { SetProperty(ref _targetCommunicationLogic, value); }
+        }
+
 
         #region Com Port and Baud Rate and Bootloader Commands
         /// <summary>
@@ -52,6 +81,10 @@ namespace BootloaderFlashUtility.ViewModels
         /// List of the available baud rates
         /// </summary>
         public List<int> BaudRates { get; set; }
+        /// <summary>
+        /// List of the available baud rates
+        /// </summary>
+        public List<string> BootCommands { get; set; }
         /// <summary>
         /// Selected Baud Rate
         /// </summary>
@@ -73,7 +106,70 @@ namespace BootloaderFlashUtility.ViewModels
             set
             {
                 SetProperty(ref _selectedComPort, value);
+                TestConnectCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        /// <summary>
+        /// Selected Com Port
+        /// </summary>
+        public string SelectedBootCommands
+        {
+            get { return _selectedBootCommands; }
+            set
+            {
+                SetProperty(ref _selectedBootCommands, value);
+            }
+        }
+        #endregion
+        #endregion
+
+        #region UI Buttons
+        /// <summary>
+        /// Whether the connect button is enabled or not 
+        /// </summary>
+        public bool TestButtonConnectIsEnabled
+        {
+            get { return _isTestButtonConnectEnabled; }
+            set
+            {
+                SetProperty(ref _isTestButtonConnectEnabled, value);
+            }
+        }
+
+        /// <summary>
+        /// Associate Delegate Command to "Testconnect" Button
+        /// </summary>
+        public DelegateCommand TestConnectCommand { get; private set; }
+        #endregion
+
+
+        #region Constructors
+        public MainWindowViewModel() 
+        {
+            TargetCommunicationLogic = new TargetCommunicationLogic();
+            ComPorts                 = TargetCommunicationLogic.GetPorts();
+            BaudRates                = TargetCommunicationLogic.GetBaudRates();
+            BootCommands             = TargetCommunicationLogic.GetCommand();
+
+            #region Delegate Commands
+            TestConnectCommand = new DelegateCommand(TestConnectCommandExecute, TestConnectCommandCanExecute);
+            
+            #endregion
+
+        }
+        #region
+        private bool TestConnectCommandCanExecute()
+        {
+            if (string.IsNullOrEmpty(SelectedComPort))
+                return false;
+
+            return true;
+        }
+
+        private void TestConnectCommandExecute()
+        {
+            TargetCommunicationLogic.TestConnection(SelectedComPort, SelectedBaudRate);
         }
         #endregion
 
